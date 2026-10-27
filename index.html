@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NuKitu · POC tarif dasar per modular</title>
+  <!--
+    POC tarif (tiket 261027100801): tempat mencoba rumus tarif mitra tanpa
+    menyentuh aplikasi utama, dashboard, atau servernya. Dibuka langsung dari
+    berkas (file://): tanpa server, tanpa build, tanpa CDN. Skripnya skrip
+    biasa, bukan modul — peramban menolak memuat modul dari file://.
+  -->
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <main class="halaman">
+    <header class="kepala">
+      <p class="label-poc">POC · tidak tersambung ke aplikasi</p>
+      <h1>Tarif dasar per modular</h1>
+      <p class="pengantar">
+        Satu baris per modular, tiga jenis pekerjaan. Harga dalam Rupiah dan
+        bisa diubah langsung: ketik, lalu tekan Enter atau pindah ke isian lain.
+        Esc membatalkan ketikan yang belum disimpan.
+      </p>
+    </header>
+
+    <div id="aplikasi"></div>
+    <noscript>Halaman ini butuh JavaScript.</noscript>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+/*
+ * Gaya POC tarif (tiket 261027100801). CSS biasa, tanpa Tailwind dan tanpa
+ * CDN: berkasnya dibuka dari file://. Warnanya mengikuti dashboard2 supaya
+ * terasa satu keluarga, tapi tidak ada yang diimpor dari sana.
+ *
+ * Layar sempit (≤ 640px): tabel berubah jadi kartu per modular — nama di
+ * atas, tiga isian harga berdampingan dengan labelnya sendiri.
+ */
+:root {
+  --latar: #f6f7f9;
+  --kartu: #ffffff;
+  --garis: #e7e9ee;
+  --garis-2: #d6dae2;
+  --teks: #161a22;
+  --teks-2: #474e5d;
+  --redup: #6e7585;
+  --merek: #1d4ed8;
+  --merek-lembut: #eef3ff;
+  --peringatan: #9a5b06;
+  --peringatan-lembut: #fdf3e1;
+  --buruk: #b42330;
+  --buruk-lembut: #fdecee;
+  --sudut: 10px;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--latar);
+  color: var(--teks);
+  font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Roboto, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+button, input { font: inherit; color: inherit; }
+
+.halaman { max-width: 960px; margin: 0 auto; padding: 24px 20px 64px; }
+
+.kepala h1 { margin: 2px 0 6px; font-size: 22px; line-height: 1.3; }
+.label-poc {
+  display: inline-block; margin: 0; padding: 2px 8px; border-radius: 999px;
+  background: var(--peringatan-lembut); color: var(--peringatan);
+  font-size: 12px; font-weight: 600;
+}
+.pengantar { margin: 0 0 16px; color: var(--teks-2); max-width: 62ch; }
+.redup { color: var(--redup); font-weight: 400; }
+
+/* Bar status dan tombol kembali ke contoh */
+.bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px;
+  margin: 0 0 12px;
+}
+.status { margin: 0; }
+.bar-aksi { display: flex; align-items: center; gap: 8px; }
+.tanya { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.tombol {
+  padding: 6px 12px; border: 1px solid var(--garis-2); border-radius: 8px;
+  background: var(--kartu); cursor: pointer;
+}
+.tombol:hover:not(:disabled) { border-color: var(--merek); color: var(--merek); }
+.tombol:disabled { color: var(--redup); cursor: not-allowed; opacity: .7; }
+.tombol-bahaya { border-color: var(--buruk); color: var(--buruk); }
+.tombol-bahaya:hover:not(:disabled) { background: var(--buruk-lembut); border-color: var(--buruk); color: var(--buruk); }
+.peringatan {
+  margin: 0 0 12px; padding: 8px 12px; border-radius: 8px;
+  background: var(--peringatan-lembut); color: var(--peringatan);
+}
+
+/* Tabel */
+.bungkus-tabel {
+  background: var(--kartu); border: 1px solid var(--garis); border-radius: var(--sudut); overflow: hidden;
+}
+.tarif { width: 100%; border-collapse: collapse; }
+.tarif th, .tarif td { padding: 6px 12px; border-bottom: 1px solid var(--garis); text-align: left; vertical-align: top; }
+.tarif thead th {
+  position: sticky; top: 0; z-index: 1; background: var(--kartu);
+  font-size: 12px; text-transform: uppercase; letter-spacing: .03em; color: var(--teks-2);
+}
+.tarif .kolom-harga { width: 150px; text-align: right; }
+.tarif tbody th[scope="row"] { font-weight: 500; padding-top: 11px; }
+.baris-kategori th { background: var(--merek-lembut); font-weight: 600; padding-top: 10px; padding-bottom: 10px; }
+.kode { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--merek); }
+
+.tarif input {
+  width: 100%; padding: 5px 8px; border: 1px solid var(--garis-2); border-radius: 6px;
+  background: var(--kartu); text-align: right; font-variant-numeric: tabular-nums;
+}
+.tarif input:focus { outline: 2px solid var(--merek); outline-offset: -1px; border-color: var(--merek); }
+.tarif td.diubah input { background: var(--merek-lembut); border-color: var(--merek); }
+.tarif input[aria-invalid="true"] { border-color: var(--buruk); background: var(--buruk-lembut); }
+.galat { margin: 4px 0 0; color: var(--buruk); font-size: 12px; line-height: 1.4; text-align: left; }
+
+@media (max-width: 640px) {
+  .halaman { padding: 16px 12px 48px; }
+  .kepala h1 { font-size: 19px; }
+  .bungkus-tabel { background: none; border: 0; border-radius: 0; overflow: visible; }
+  .tarif, .tarif tbody { display: block; }
+  .tarif thead { display: none; }
+  .tarif tr {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 8px;
+    margin: 0 0 8px; padding: 10px; border: 1px solid var(--garis); border-radius: var(--sudut);
+    background: var(--kartu);
+  }
+  .tarif th, .tarif td { display: block; padding: 0; border: 0; }
+  .tarif tbody th[scope="row"] { grid-column: 1 / -1; padding: 0 0 2px; }
+  .tarif td::before {
+    content: attr(data-jenis); display: block; margin-bottom: 2px;
+    font-size: 11px; color: var(--teks-2); text-transform: uppercase; letter-spacing: .03em;
+  }
+  .tarif tr.baris-kategori {
+    display: block; margin: 16px 0 8px; padding: 8px 10px; border-color: transparent;
+    background: var(--merek-lembut);
+  }
+  .baris-kategori th { padding: 0; background: none; }
+}
