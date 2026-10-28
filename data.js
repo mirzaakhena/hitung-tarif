@@ -10,13 +10,35 @@
  * Angka-angkanya CONTOH, bukan tarif sungguhan — dikarang di kisaran yang
  * Mirza beri (Instalasi ±100–150 rb, Perbaikan ±250–400 rb, Perawatan
  * ±120–180 rb), lebih tinggi untuk alat yang lebih rumit. Harga yang diubah
- * di halaman disimpan di peramban (`app.js`); berkas ini tetap harga contohnya.
+ * di halaman disimpan di peramban (`harga.js`); berkas ini tetap harga contohnya.
+ *
+ * `senioritas` dan `penilaian` dipakai simulasi bonus bintang (tiket
+ * 261028095701): batas bonus dan potongan dalam persen dari tarif dasar, dan
+ * enam penilaian yang disetujui Mirza 28 Okt 2026.
  */
 window.POC_TARIF = {
   jenis: [
     { id: 'instalasi', nama: 'Instalasi' },
     { id: 'perbaikan', nama: 'Perbaikan' },
     { id: 'perawatan', nama: 'Perawatan' },
+  ],
+  // Urutan dari yang paling junior. Angka dari Mirza, 28 Okt 2026.
+  senioritas: [
+    { id: 'rookie', nama: 'Rookie', bonusMaks: 5, potonganMaks: 60 },
+    { id: 'senior', nama: 'Senior', bonusMaks: 10, potonganMaks: 50 },
+    { id: 'intermediate', nama: 'Intermediate', bonusMaks: 15, potonganMaks: 45 },
+    { id: 'advance', nama: 'Advance', bonusMaks: 20, potonganMaks: 40 },
+    { id: 'expert', nama: 'Expert', bonusMaks: 20, potonganMaks: 10 },
+  ],
+  // Nilai tiap bintang: indeks 0 = bintang 1.
+  nilaiBintang: [-2, -1, 0, 1, 2],
+  penilaian: [
+    { id: 'eq1', kelompok: 'EQ', nama: 'Komunikasi', penjelasan: 'Menjelaskan masalah, tindakan, dan hasil dengan bahasa yang dimengerti.' },
+    { id: 'eq2', kelompok: 'EQ', nama: 'Keramahan dan sopan santun', penjelasan: 'Sikap terhadap staf, sabar menanggapi pertanyaan.' },
+    { id: 'eq3', kelompok: 'EQ', nama: 'Ketepatan waktu dan komitmen', penjelasan: 'Datang sesuai jadwal, mengabari bila terlambat, menepati yang dijanjikan.' },
+    { id: 'iq1', kelompok: 'IQ', nama: 'Hasil kerja', penjelasan: 'Alat berfungsi baik sesudahnya dan masalahnya tuntas.' },
+    { id: 'iq2', kelompok: 'IQ', nama: 'Ketelitian dan kepatuhan prosedur', penjelasan: 'Pemeriksaan menyeluruh, memperhatikan keselamatan, area kerja rapi.' },
+    { id: 'iq3', kelompok: 'IQ', nama: 'Efisiensi kerja', penjelasan: 'Selesai dalam waktu wajar, siap dengan alat dan suku cadang, tanpa bolak-balik.' },
   ],
   kategori: [
     {

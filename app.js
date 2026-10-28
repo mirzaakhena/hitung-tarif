@@ -3,12 +3,12 @@
  *
  * Tabel: satu baris per modular, dikelompokkan per kategori, tiga kolom harga
  * (Instalasi, Perbaikan, Perawatan). Harga contohnya dari `data.js`; harga
- * yang diubah di halaman disimpan di `localStorage` (kunci `KUNCI`), hanya
+ * yang diubah disimpan lewat `harga.js` (dipakai juga oleh simulasi), hanya
  * yang berbeda dari contoh. "Kembali ke harga contoh" membuang simpanan itu.
  *
  * Isian diterima hanya bila bilangan bulat positif (lihat `periksaHarga`).
- * Simpanan dibaca dengan penjagaan yang sama, jadi isi yang rusak atau
- * disunting tangan diabaikan, bukan ditampilkan.
+ * Simpanan dibaca dengan penjagaan yang sama (`harga.js`), jadi isi yang
+ * rusak atau disunting tangan diabaikan, bukan ditampilkan.
  *
  * Tidak tersambung ke aplikasi utama, dashboard, atau server. Bila peramban
  * menolak penyimpanan, halaman tetap jalan dan mengatakan perubahan hilang
@@ -18,105 +18,16 @@
   'use strict';
 
   const D = window.POC_TARIF;
-  const KUNCI = 'nukitu-poc-tarif:harga';
-  const MAKS = 999999999;
+  const H = window.POC_HARGA;
+  const MAKS = H.MAKS;
   const JENIS = D.jenis;
+  const contoh = H.contoh;
+  const harga = H.harga;
+  const rupiah = H.rupiah;
 
-  /* ------------------------------------------------------------- data ---- */
-
-  /** Harga contoh per modular: { nama: { instalasi, perbaikan, perawatan } }. */
-  const contoh = {};
-  for (const k of D.kategori) {
-    for (const [nama, ...harga] of k.modular) {
-      contoh[nama] = {};
-      JENIS.forEach((j, i) => { contoh[nama][j.id] = harga[i]; });
-    }
-  }
-
-  /* ------------------------------------------------------- penyimpanan ---- */
-
-  const penyimpanan = (function () {
-    try {
-      const s = window.localStorage;
-      const coba = KUNCI + ':coba';
-      s.setItem(coba, '1');
-      s.removeItem(coba);
-      return s;
-    } catch (e) {
-      return null;
-    }
-  })();
-
-  function hargaSah(n) {
-    return Number.isSafeInteger(n) && n > 0 && n <= MAKS;
-  }
-
-  /** Harga yang diubah, dari simpanan. Butir yang tidak dikenal atau tidak sah dibuang. */
-  function bacaSimpanan() {
-    const hasil = {};
-    if (!penyimpanan) return hasil;
-    let mentah;
-    try {
-      mentah = JSON.parse(penyimpanan.getItem(KUNCI) || '{}');
-    } catch (e) {
-      return hasil;
-    }
-    if (!mentah || typeof mentah !== 'object') return hasil;
-    for (const nama of Object.keys(mentah)) {
-      if (!contoh[nama] || !mentah[nama] || typeof mentah[nama] !== 'object') continue;
-      for (const j of JENIS) {
-        const n = mentah[nama][j.id];
-        if (hargaSah(n) && n !== contoh[nama][j.id]) {
-          (hasil[nama] = hasil[nama] || {})[j.id] = n;
-        }
-      }
-    }
-    return hasil;
-  }
-
-  /** Menulis `diubah` ke simpanan. `false` bila peramban menolaknya. */
-  function simpan() {
-    if (!penyimpanan) return false;
-    try {
-      if (Object.keys(diubah).length) penyimpanan.setItem(KUNCI, JSON.stringify(diubah));
-      else penyimpanan.removeItem(KUNCI);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  let diubah = bacaSimpanan();
-  let gagalSimpan = !penyimpanan;
   let tanyaReset = false;
 
-  function harga(nama, jenis) {
-    const u = diubah[nama];
-    return u && u[jenis] !== undefined ? u[jenis] : contoh[nama][jenis];
-  }
-
-  function aturHarga(nama, jenis, n) {
-    if (n === contoh[nama][jenis]) {
-      if (diubah[nama]) {
-        delete diubah[nama][jenis];
-        if (!Object.keys(diubah[nama]).length) delete diubah[nama];
-      }
-    } else {
-      (diubah[nama] = diubah[nama] || {})[jenis] = n;
-    }
-    gagalSimpan = !simpan();
-  }
-
-  function jumlahDiubah() {
-    return Object.values(diubah).reduce((t, u) => t + Object.keys(u).length, 0);
-  }
-
   /* ---------------------------------------------------------- isian ---- */
-
-  /** Rupiah tanpa "Rp": 120000 → "120.000". */
-  function rupiah(n) {
-    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  }
 
   /**
    * Isian harga → { ok: true, nilai } atau { ok: false, alasan }.
@@ -148,11 +59,11 @@
   const akar = document.getElementById('aplikasi');
 
   function gambarBar() {
-    const n = jumlahDiubah();
+    const n = H.jumlahDiubah();
     const status = n
       ? '<b>' + n + '</b> harga diubah dari contoh.'
       : 'Semua harga masih harga contoh.';
-    const peringatan = gagalSimpan
+    const peringatan = H.gagalSimpan()
       ? '<p class="peringatan" role="alert">Peramban menolak menyimpan, jadi perubahan hilang saat halaman dimuat ulang.</p>'
       : '';
     const reset = tanyaReset
@@ -234,7 +145,7 @@
     }
     const nama = input.dataset.nama;
     const jenis = input.dataset.jenisId;
-    aturHarga(nama, jenis, hasil.nilai);
+    H.aturHarga(nama, jenis, hasil.nilai);
     tampilGalat(input, '');
     input.value = rupiah(hasil.nilai);
     input.parentElement.classList.toggle('diubah', hasil.nilai !== contoh[nama][jenis]);
@@ -278,8 +189,7 @@
       const r = akar.querySelector('[data-aksi="reset"]');
       if (r) r.focus();
     } else if (aksi === 'reset-ya') {
-      diubah = {};
-      gagalSimpan = !simpan();
+      H.kembalikanSemua();
       tanyaReset = false;
       gambar();
     }
