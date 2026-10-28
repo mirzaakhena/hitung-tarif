@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NuKitu · POC batas bonus dan potongan per senioritas</title>
+  <!--
+    POC batas bonus dan potongan per senioritas (tiket 261028104601). Angka
+    yang diubah di sini dipakai simulasi (dibaca lewat batas.js). Dibuka dari
+    file://, tanpa server, build, atau CDN.
+  -->
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <main class="halaman">
+    <header class="kepala">
+      <p class="label-poc">POC · tidak tersambung ke aplikasi</p>
+      <nav class="nav" aria-label="Halaman POC">
+        <a href="index.html">Tarif dasar</a>
+        <a href="senioritas.html" aria-current="page">Batas senioritas</a>
+        <a href="simulasi.html">Simulasi bonus bintang</a>
+      </nav>
+      <h1>Batas bonus dan potongan per senioritas</h1>
+      <p class="pengantar">
+        Dalam persen dari tarif dasar, urutan dari yang paling junior. Bonus
+        maksimal didapat bila keenam bintang 5; potongan maksimal bila keenam
+        bintang 1. Angkanya bisa diubah langsung (bilangan bulat 0–100): ketik,
+        lalu tekan Enter atau pindah ke isian lain. Esc membatalkan ketikan yang
+        belum disimpan. Simulasi langsung memakai angka yang berlaku.
+      </p>
+    </header>
+
+    <div id="batas"></div>
+    <noscript>Halaman ini butuh JavaScript.</noscript>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="batas.js"></script>
+  <script src="senioritas.js"></script>
+</body>
+</html>

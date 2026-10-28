@@ -22,7 +22,8 @@ window.POC_TARIF = {
     { id: 'perbaikan', nama: 'Perbaikan' },
     { id: 'perawatan', nama: 'Perawatan' },
   ],
-  // Urutan dari yang paling junior. Angka dari Mirza, 28 Okt 2026.
+  // Urutan dari yang paling junior. Angka dari Mirza, 28 Okt 2026 — angka asal
+  // tab Batas senioritas; angka yang diubah di sana disimpan lewat `batas.js`.
   senioritas: [
     { id: 'rookie', nama: 'Rookie', bonusMaks: 5, potonganMaks: 60 },
     { id: 'senior', nama: 'Senior', bonusMaks: 10, potonganMaks: 50 },

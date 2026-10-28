@@ -9,8 +9,10 @@
  *   B — nilai positif (P, 0..12) dan negatif (N, −12..0) dihitung terpisah:
  *       P/12 × bonus maksimal + N/12 × potongan maksimal.
  *
- * Tarif dasar dibaca lewat `harga.js`, jadi harga yang diubah di tabel ikut
- * terpakai (juga bila tabel diubah di tab lain: peristiwa `storage`).
+ * Tarif dasar dibaca lewat `harga.js` dan batas bonus/potongan per senioritas
+ * lewat `batas.js` (tiket 261028104601), jadi angka yang diubah di tab Tarif
+ * dasar dan Batas senioritas ikut terpakai (juga bila diubah di tab lain:
+ * peristiwa `storage`).
  *
  * Hitungannya bilangan bulat supaya tidak ada galat pecahan: persen disimpan
  * sebagai X/12 (X = S × maks, atau P × bonus + N × potongan), besar Rupiah
@@ -22,6 +24,7 @@
 
   const D = window.POC_TARIF;
   const H = window.POC_HARGA;
+  const B = window.POC_BATAS;
   const NILAI = D.nilaiBintang;
   const MINUS = '−';
 
@@ -110,7 +113,8 @@
     bintang: Object.fromEntries(D.penilaian.map((p) => [p.id, 3])),
   };
 
-  const senioritasDari = (id) => D.senioritas.find((s) => s.id === id);
+  // Batas yang berlaku (angka Mirza atau yang diubah di tab Batas senioritas).
+  const senioritasDari = (id) => B.senioritas(id);
   const nilaiSekarang = () => D.penilaian.map((p) => NILAI[pilihan.bintang[p.id] - 1]);
 
   /* -------------------------------------------------------- tampilan ---- */
@@ -137,7 +141,8 @@
           '<label class="isian-pilih"><span>Senioritas mitra</span><select data-pilih="senioritas">' + opsiSen + '</select></label>' +
         '</div>' +
         '<p class="tarif-dasar" data-tarif></p>' +
-        (H.adaPenyimpanan() ? '' : '<p class="peringatan" role="alert">Peramban menolak penyimpanan, jadi harga yang diubah di tabel tidak terbaca di sini; simulasi memakai harga contoh.</p>') +
+        '<p class="batas-pilihan" data-batas-pilihan></p>' +
+        (H.adaPenyimpanan() && B.adaPenyimpanan() ? '' : '<p class="peringatan" role="alert">Peramban menolak penyimpanan, jadi harga dan batas yang diubah di tab lain tidak terbaca di sini; simulasi memakai harga contoh dan batas angka Mirza.</p>') +
       '</section>'
     );
   }
@@ -181,21 +186,6 @@
     );
   }
 
-  function gambarBatas() {
-    return (
-      '<section class="panel" aria-labelledby="judul-batas">' +
-        '<h2 id="judul-batas">Batas bonus dan potongan per senioritas</h2>' +
-        '<p class="redup kecil">Dari tarif dasar. Urutan dari yang paling junior.</p>' +
-        '<table class="batas">' +
-          '<thead><tr><th scope="col">Senioritas</th><th scope="col">Bonus maksimal<br><span class="redup">semua bintang 5</span></th><th scope="col">Potongan maksimal<br><span class="redup">semua bintang 1</span></th></tr></thead>' +
-          '<tbody>' + D.senioritas.map((s) =>
-            '<tr data-senioritas="' + s.id + '"><th scope="row">' + esc(s.nama) + '</th><td>' + s.bonusMaks + '%</td><td>' + s.potonganMaks + '%</td></tr>').join('') +
-          '</tbody>' +
-        '</table>' +
-      '</section>'
-    );
-  }
-
   function gambar() {
     akar.innerHTML =
       gambarPekerjaan() +
@@ -203,8 +193,7 @@
       '<section class="panel" aria-labelledby="judul-hasil">' +
         '<h2 id="judul-hasil">Hasil</h2>' +
         '<div data-hasil aria-live="polite"></div>' +
-      '</section>' +
-      gambarBatas();
+      '</section>';
   }
 
   /* ---------------------------------------------------------- hasil ---- */
@@ -277,12 +266,13 @@
       fs.querySelector('[data-nilai]').textContent = 'bintang ' + b + ' · nilai ' + nilaiTeks(nilai[i]);
     });
 
-    akar.querySelectorAll('[data-senioritas]').forEach((tr) => {
-      const ini = tr.dataset.senioritas === pilihan.senioritas;
-      tr.classList.toggle('terpilih', ini);
-      if (ini) tr.setAttribute('aria-current', 'true');
-      else tr.removeAttribute('aria-current');
-    });
+    /** "8%" dengan tanda bila berbeda dari angka Mirza. */
+    const angkaBatas = (jenis) => '<b data-' + (jenis === 'bonusMaks' ? 'bonus' : 'potongan') + '-maks>' + sen[jenis] + '%</b>' +
+      (B.diubah(sen.id, jenis) ? ' <span class="tanda-diubah">diubah, angka Mirza ' + B.asal[sen.id][jenis] + '%</span>' : '');
+    akar.querySelector('[data-batas-pilihan]').innerHTML =
+      'Batas ' + esc(sen.nama) + ': bonus maksimal ' + angkaBatas('bonusMaks') +
+      ' · potongan maksimal ' + angkaBatas('potonganMaks') +
+      ' · <a href="senioritas.html">ubah di tab Batas senioritas</a>';
 
     const positif = nilai.filter((v) => v > 0);
     const negatif = nilai.filter((v) => v < 0);
@@ -340,16 +330,18 @@
     perbarui();
   });
 
-  // Harga diubah di tabel pada tab lain, atau kembali ke halaman ini dari tembolok.
+  // Harga atau batas diubah di tab lain, atau kembali ke halaman ini dari tembolok.
   window.addEventListener('storage', (e) => {
-    if (e.key === H.KUNCI || e.key === null) {
+    if (e.key === H.KUNCI || e.key === B.KUNCI || e.key === null) {
       H.muatUlang();
+      B.muatUlang();
       perbarui();
     }
   });
   window.addEventListener('pageshow', (e) => {
     if (e.persisted) {
       H.muatUlang();
+      B.muatUlang();
       perbarui();
     }
   });

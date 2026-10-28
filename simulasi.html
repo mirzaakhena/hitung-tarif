@@ -7,7 +7,9 @@
   <!--
     POC simulasi bonus dan potongan dari enam bintang EQ dan IQ (tiket
     261028095701). Tarif dasarnya dari tabel tarif dasar (index.html), termasuk
-    harga yang diubah di sana (dibaca lewat harga.js). Dibuka dari file://,
+    harga yang diubah di sana (dibaca lewat harga.js); batas bonus dan potongan
+    dari tab Batas senioritas (senioritas.html, dibaca lewat batas.js, tiket
+    261028104601). Dibuka dari file://,
     tanpa server, build, atau CDN.
   -->
   <link rel="stylesheet" href="app.css">
@@ -18,6 +20,7 @@
       <p class="label-poc">POC · tidak tersambung ke aplikasi</p>
       <nav class="nav" aria-label="Halaman POC">
         <a href="index.html">Tarif dasar</a>
+        <a href="senioritas.html">Batas senioritas</a>
         <a href="simulasi.html" aria-current="page">Simulasi bonus bintang</a>
       </nav>
       <h1>Simulasi bonus dan potongan dari bintang</h1>
@@ -26,8 +29,8 @@
         IQ (mutu kerja teknis), masing-masing 1–5. Nilai tiap bintang:
         1 → −2, 2 → −1, 3 → 0 (standar), 4 → +1, 5 → +2. Semua bintang 5
         memberi bonus maksimal senioritasnya; semua bintang 1 memberi potongan
-        maksimal. Hasilnya dihitung dengan dua cara berdampingan untuk
-        dibandingkan.
+        maksimal. Batas tiap senioritas diatur di tab Batas senioritas.
+        Hasilnya dihitung dengan dua cara berdampingan untuk dibandingkan.
       </p>
     </header>
 
@@ -37,6 +40,7 @@
 
   <script src="data.js"></script>
   <script src="harga.js"></script>
+  <script src="batas.js"></script>
   <script src="simulasi.js"></script>
 </body>
 </html>
