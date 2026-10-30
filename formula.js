@@ -418,7 +418,7 @@
     const isi = !keadaan.order.length
       ? '<p class="redup" data-order-kosong>Belum ada order. Muat set contoh atau isi ulasan order secara manual di atas.</p>'
       : saringan + (tampil.length
-        ? '<div class="bungkus-tabel"><table class="tarif tabel-order"><thead><tr><th scope="col">Order · modular</th><th scope="col">Hari</th><th scope="col">Jenis</th><th scope="col">Grading</th><th scope="col">Jam</th><th scope="col">Nilai bintang</th><th scope="col">Status</th></tr></thead><tbody>' + baris + '</tbody></table></div>'
+        ? '<div class="bungkus-tabel gulir" data-gulir="order" role="region" tabindex="0" aria-label="Tabel order, bisa digulir"><table class="tarif tabel-order"><thead><tr><th scope="col">Order · modular</th><th scope="col">Hari</th><th scope="col">Jenis</th><th scope="col">Grading</th><th scope="col">Jam</th><th scope="col">Nilai bintang</th><th scope="col">Status</th></tr></thead><tbody>' + baris + '</tbody></table></div>'
         : '<p class="redup" data-saring-kosong>' + esc(saring.kosong) + '</p>');
     return (
       '<section class="panel" aria-labelledby="judul-order">' +
@@ -462,14 +462,24 @@
     '</ol>';
   }
 
+  /**
+   * Satu kartu langkah hitung. Daftar langkahnya digulir di dalam kartu,
+   * judulnya tetap di atas (tiket 261030162901).
+   */
+  function kartuLangkah(r, id, nama, langkah) {
+    return '<article class="kartu-hasil tetap langkah-rumus" data-langkah="' + id + '"><h3>' + esc(nama) + '</h3>' +
+      '<div class="gulir gulir-langkah" data-gulir="langkah-' + id + '-' + r.ke + '" role="region" tabindex="0" aria-label="Langkah ' + esc(nama) + ', bisa digulir">' +
+        '<ol class="daftar-langkah">' + susunLangkah(langkah) + '</ol></div></article>';
+  }
+
   /** Langkah hitung kedua rumus milik penerapan `r`, tertutup sampai dibuka. */
   function gambarLangkahPenerapan(r) {
     return '<details class="penerapan" data-penerapan="' + r.ke + '"' + (terbuka.has(r.ke) ? ' open' : '') + '>' +
       '<summary>Langkah hitung penerapan ke-' + r.ke + '</summary>' +
       '<p class="redup kecil">Kedua rumus, dari bintang sampai Rupiah, dengan angka sebelum pembulatan ("≈" berarti angkanya dibulatkan untuk ditampilkan).</p>' +
       '<div class="dua-cara">' +
-        '<article class="kartu-hasil tetap langkah-rumus" data-langkah="mirza"><h3>Rumus Mirza</h3><ol class="daftar-langkah">' + susunLangkah(langkahMirza(r)) + '</ol></article>' +
-        '<article class="kartu-hasil tetap langkah-rumus" data-langkah="usulan"><h3>Rumus usulan</h3><ol class="daftar-langkah">' + susunLangkah(langkahUsulan(r)) + '</ol></article>' +
+        kartuLangkah(r, 'mirza', 'Rumus Mirza', langkahMirza(r)) +
+        kartuLangkah(r, 'usulan', 'Rumus usulan', langkahUsulan(r)) +
       '</div>' +
     '</details>';
   }
@@ -507,7 +517,7 @@
         '<p class="redup kecil" data-keterangan-tarif>Untuk setiap modular yang pernah diorder; ketiga jenis pekerjaan. Rupiah dibulatkan ke 2 angka desimal saat ditampilkan.' + keterangan +
           (h.usulan.M < 0 && !penyetel.usulan.pengurangIkutJam ? ' Pengurang rumus usulan berlaku penuh, jadi modular yang belum pernah diorder pun turun ' + persen(h.usulan.M) + '.' : '') + '</p>' +
         (h.modular.length
-          ? '<div class="bungkus-tabel"><table class="tarif tabel-tarif-mitra"><thead><tr><th scope="col">Modular · jenis</th><th scope="col" class="kolom-harga">Tarif dasar</th><th scope="col" class="kolom-harga">Rumus Mirza</th><th scope="col" class="kolom-harga">Rumus usulan</th></tr></thead><tbody>' + baris + '</tbody></table></div>'
+          ? '<div class="bungkus-tabel gulir" data-gulir="tarif" role="region" tabindex="0" aria-label="Tabel tarif milik mitra, bisa digulir"><table class="tarif tabel-tarif-mitra"><thead><tr><th scope="col">Modular · jenis</th><th scope="col" class="kolom-harga">Tarif dasar</th><th scope="col" class="kolom-harga">Rumus Mirza</th><th scope="col" class="kolom-harga">Rumus usulan</th></tr></thead><tbody>' + baris + '</tbody></table></div>'
           : '<p class="redup" data-tarif-kosong>Belum ada modular yang diorder.</p>') +
         '<div class="dua-cara poin-dua">' +
           '<article class="kartu-hasil tetap" data-poin="mirza"><h3>Poin · rumus Mirza</h3>' +
@@ -649,10 +659,27 @@
     const h = hitungSemua();
     akar.querySelector('[data-bagian-mitra]').innerHTML = gambarMitra();
     akar.querySelector('[data-bagian-contoh]').innerHTML = gambarContoh();
-    akar.querySelector('[data-bagian-order]').innerHTML = gambarOrder();
-    akar.querySelector('[data-bagian-tarif]').innerHTML = gambarTarif(h);
+    isiBagian('order', gambarOrder());
+    isiBagian('tarif', gambarTarif(h));
     akar.querySelector('[data-bagian-penyetel]').innerHTML = gambarPenyetel();
     tampakkanPenerapanDilihat();
+  }
+
+  /**
+   * Gambar ulang `[data-bagian-<nama>]` tanpa melempar bagian yang digulir di
+   * tempat (`[data-gulir]`) kembali ke atas: posisi gulirnya dicatat lalu
+   * dipasang lagi pada bagian bernama sama di gambar baru (tiket 261030162901).
+   * `dariAtas` membuang catatan itu, untuk isi yang memang lain (saringan).
+   */
+  function isiBagian(nama, html, dariAtas) {
+    const wadah = akar.querySelector('[data-bagian-' + nama + ']');
+    const posisi = new Map();
+    if (!dariAtas) for (const g of wadah.querySelectorAll('[data-gulir]')) posisi.set(g.dataset.gulir, [g.scrollTop, g.scrollLeft]);
+    wadah.innerHTML = html;
+    for (const g of wadah.querySelectorAll('[data-gulir]')) {
+      const p = posisi.get(g.dataset.gulir);
+      if (p) [g.scrollTop, g.scrollLeft] = p;
+    }
   }
 
   /** Daftar ringkas bisa digulir sendiri: baris yang dilihat digulir ke dalam pandangan. */
@@ -666,10 +693,10 @@
   }
 
   /** Gambar ulang bagian Order saja, lalu fokus ke `pemilih` bila diberikan. */
-  function gambarOrderSaja(pemilih) {
-    akar.querySelector('[data-bagian-order]').innerHTML = gambarOrder();
+  function gambarOrderSaja(pemilih, dariAtas) {
+    isiBagian('order', gambarOrder(), dariAtas);
     const f = pemilih && akar.querySelector(pemilih);
-    if (f) f.focus();
+    if (f) f.focus({ preventScroll: true });
   }
 
   /* ---------------------------------------------------------- aksi ---- */
@@ -756,7 +783,7 @@
     const saring = e.target.closest('[data-saring]');
     if (saring) {
       if (SARINGAN.some((x) => x.id === saring.dataset.saring)) saringOrder = saring.dataset.saring;
-      gambarOrderSaja('[data-saring="' + saringOrder + '"]');
+      gambarOrderSaja('[data-saring="' + saringOrder + '"]', true);
       return;
     }
     const pilih = e.target.closest('[data-ke-tarif]');
@@ -835,7 +862,7 @@
     const n = keadaan.penerapan.length;
     if (!Number.isInteger(ke) || ke < 1 || ke > n) return false;
     lihatKe = ke === n ? null : ke;
-    akar.querySelector('[data-bagian-tarif]').innerHTML = gambarTarif(hitungSemua());
+    isiBagian('tarif', gambarTarif(hitungSemua()));
     tampakkanPenerapanDilihat();
     return true;
   }
@@ -844,7 +871,7 @@
   function pilihHalamanTarif(ke) {
     if (!tampilkanHalamanTarif(ke)) return;
     const b = akar.querySelector('[data-ke-tarif="' + ke + '"]');
-    if (b) b.focus();
+    if (b) b.focus({ preventScroll: true }); // barisnya sudah ditampakkan di daftar; halaman tidak ikut melompat
   }
 
   // Simpanan diubah di jendela lain (tab ini, tarif dasar, grading, grading mitra,
