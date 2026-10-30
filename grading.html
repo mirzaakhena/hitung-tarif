@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>NuKitu · POC grading: poin dan potongan maksimal</title>
+  <!--
+    POC tab Grading (tiket 261028104601, dulu "Batas senioritas" di
+    senioritas.html; jadi Grading di tiket 261030105301). Angka yang diubah di
+    sini disimpan lewat batas.js. Di bawah tabel, grading mitra rekaan tab
+    Formula tarif mitra (tiket 261030124701, disimpan lewat pengaturan.js).
+    Dibuka dari file://, tanpa server, build, atau CDN. senioritas.html kini
+    hanya meneruskan ke halaman ini.
+  -->
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <main class="halaman">
+    <header class="kepala">
+      <p class="label-poc">POC · tidak tersambung ke aplikasi</p>
+      <nav class="nav" aria-label="Halaman POC">
+        <a href="index.html">Tarif dasar</a>
+        <a href="grading.html" aria-current="page">Grading</a>
+        <a href="penyetel.html">Penyetel rumus</a>
+        <a href="formula.html">Formula tarif mitra</a>
+      </nav>
+      <h1>Poin dan potongan maksimal per grading</h1>
+      <p class="pengantar">
+        Dalam persen dari tarif dasar, urutan dari grading terendah. Poin
+        maksimal didapat bila keenam bintang 5; potongan maksimal bila keenam
+        bintang 1. Angkanya bisa diubah langsung (bilangan bulat 0–100): ketik,
+        lalu tekan Enter atau pindah ke isian lain. Esc membatalkan ketikan yang
+        belum disimpan. Di bawah tabel, grading mitra yang dipakai tab Formula
+        tarif mitra.
+      </p>
+    </header>
+
+    <div id="batas"></div>
+    <noscript>Halaman ini butuh JavaScript.</noscript>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="penyimpanan.js"></script>
+  <script src="batas.js"></script>
+  <script src="rumus.js"></script>
+  <script src="pengaturan.js"></script>
+  <script src="grading.js"></script>
+</body>
+</html>

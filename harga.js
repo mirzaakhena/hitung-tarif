@@ -27,17 +27,8 @@ window.POC_HARGA = (function () {
     }
   }
 
-  const penyimpanan = (function () {
-    try {
-      const s = window.localStorage;
-      const coba = KUNCI + ':coba';
-      s.setItem(coba, '1');
-      s.removeItem(coba);
-      return s;
-    } catch (e) {
-      return null;
-    }
-  })();
+  // Diperiksa sekali di `penyimpanan.js` (tiket 261030105302).
+  const penyimpanan = window.POC_PENYIMPANAN || null;
 
   function hargaSah(n) {
     return Number.isSafeInteger(n) && n > 0 && n <= MAKS;

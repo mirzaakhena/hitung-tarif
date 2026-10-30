@@ -1,16 +1,25 @@
 /*
- * Batas bonus dan potongan efektif per senioritas (tiket 261028104601):
- * angka Mirza dari `data.js` (`senioritas`), ditimpa angka yang diubah di tab
- * Batas senioritas. Pola dan alasannya sama dengan `harga.js`: tab yang
- * mengubah dan simulasi yang memakai membaca lewat aturan yang sama.
+ * Poin maksimal dan potongan maksimal efektif per grading (tiket 261028104601;
+ * "senioritas" jadi "grading" dan "bonus" jadi "poin" di tiket 261030105301):
+ * angka Mirza dari `data.js` (`grading`), ditimpa angka yang diubah di tab
+ * Grading. Pola dan alasannya sama dengan `harga.js`: tab yang mengubah dan
+ * halaman yang memakai membaca lewat aturan yang sama.
  *
  * Yang diubah disimpan di `localStorage` (kunci `KUNCI`), hanya yang berbeda
- * dari angka Mirza: { rookie: { bonusMaks: 8 }, ... }. Simpanan dibaca dengan
- * penjagaan yang sama dengan isian — senioritas dikenal, bilangan bulat
- * 0..MAKS — jadi isi yang rusak atau disunting tangan diabaikan, bukan dipakai.
- * Nama dan urutan senioritas tidak bisa diubah (keputusan Mirza, 261028095701).
+ * dari angka Mirza: { rookie: { poinMaks: 8 }, ... }. Simpanan dibaca dengan
+ * penjagaan yang sama dengan isian — grading dikenal, bilangan bulat 0..MAKS —
+ * jadi isi yang rusak atau disunting tangan diabaikan, bukan dipakai.
+ * Nama dan urutan grading tidak bisa diubah di halaman.
  *
- * Dipakai oleh `senioritas.js` (tab) dan `simulasi.js`. Skrip biasa, bukan modul.
+ * Simpanan dari sebelum 261030105301 (kunci dan id grading sama, tapi jenisnya
+ * `bonusMaks`) tetap dibaca sebagai `poinMaks`; tulisan berikutnya memakai nama
+ * baru. Angka tersimpan mengikuti NAMA grading (id-nya tidak berubah), bukan
+ * posisinya: Senior yang dulu diubah jadi 12 tetap 12 walau angka asal Senior
+ * kini 15. Angka yang dulu tidak diubah memang tidak tersimpan, jadi ikut angka
+ * Mirza yang baru. Angka tersimpan yang kebetulan sama dengan angka Mirza yang
+ * baru tidak lagi dihitung "diubah" (nilainya sama).
+ *
+ * Dipakai oleh `grading.js` (tab) dan `simulasi.js`. Skrip biasa, bukan modul.
  */
 window.POC_BATAS = (function () {
   'use strict';
@@ -20,28 +29,22 @@ window.POC_BATAS = (function () {
   // Potongan di atas 100% membuat pembayaran negatif (keputusan Mirza 28 Okt 2026).
   const MAKS = 100;
   const JENIS = [
-    { id: 'bonusMaks', nama: 'Bonus maksimal', keterangan: 'semua bintang 5' },
+    { id: 'poinMaks', nama: 'Poin maksimal', keterangan: 'semua bintang 5' },
     { id: 'potonganMaks', nama: 'Potongan maksimal', keterangan: 'semua bintang 1' },
   ];
 
-  /** Angka Mirza per senioritas: { rookie: { bonusMaks, potonganMaks }, ... }. */
+  // Nama jenis di simpanan lama → nama sekarang (tiket 261030105301).
+  const NAMA_LAMA = { poinMaks: 'bonusMaks' };
+
+  /** Angka Mirza per grading: { rookie: { poinMaks, potonganMaks }, ... }. */
   const asal = {};
-  for (const s of D.senioritas) {
+  for (const s of D.grading) {
     asal[s.id] = {};
     for (const j of JENIS) asal[s.id][j.id] = s[j.id];
   }
 
-  const penyimpanan = (function () {
-    try {
-      const s = window.localStorage;
-      const coba = KUNCI + ':coba';
-      s.setItem(coba, '1');
-      s.removeItem(coba);
-      return s;
-    } catch (e) {
-      return null;
-    }
-  })();
+  // Diperiksa sekali di `penyimpanan.js` (tiket 261030105302).
+  const penyimpanan = window.POC_PENYIMPANAN || null;
 
   function batasSah(n) {
     return Number.isInteger(n) && n >= 0 && n <= MAKS;
@@ -61,7 +64,8 @@ window.POC_BATAS = (function () {
     for (const id of Object.keys(mentah)) {
       if (!Object.prototype.hasOwnProperty.call(asal, id) || !mentah[id] || typeof mentah[id] !== 'object') continue;
       for (const j of JENIS) {
-        const n = mentah[id][j.id];
+        const lama = NAMA_LAMA[j.id];
+        const n = mentah[id][j.id] !== undefined || !lama ? mentah[id][j.id] : mentah[id][lama];
         if (batasSah(n) && n !== asal[id][j.id]) {
           (hasil[id] = hasil[id] || {})[j.id] = n;
         }
@@ -85,16 +89,16 @@ window.POC_BATAS = (function () {
     }
   }
 
-  /** Angka yang berlaku untuk satu senioritas dan satu jenis batas. */
+  /** Angka yang berlaku untuk satu grading dan satu jenis batas. */
   function batas(id, jenis) {
     const u = diubah[id];
     return u && u[jenis] !== undefined ? u[jenis] : asal[id][jenis];
   }
 
-  /** Senioritas dari `data.js` dengan batas yang berlaku: { id, nama, bonusMaks, potonganMaks }. */
-  function senioritas(id) {
-    const s = D.senioritas.find((x) => x.id === id);
-    return s && { id: s.id, nama: s.nama, bonusMaks: batas(id, 'bonusMaks'), potonganMaks: batas(id, 'potonganMaks') };
+  /** Grading dari `data.js` dengan batas yang berlaku: { id, nama, poinMaks, potonganMaks }. */
+  function grading(id) {
+    const s = D.grading.find((x) => x.id === id);
+    return s && { id: s.id, nama: s.nama, poinMaks: batas(id, 'poinMaks'), potonganMaks: batas(id, 'potonganMaks') };
   }
 
   function aturBatas(id, jenis, n) {
@@ -125,11 +129,11 @@ window.POC_BATAS = (function () {
     JENIS,
     asal,
     batas,
-    senioritas,
+    grading,
     aturBatas,
     kembalikanSemua,
     jumlahDiubah,
-    /** Membaca ulang simpanan, misalnya sesudah tab Batas senioritas mengubah angka di tab lain. */
+    /** Membaca ulang simpanan, misalnya sesudah tab Grading mengubah angka di jendela lain. */
     muatUlang() { diubah = bacaSimpanan(); },
     diubah(id, jenis) { return batas(id, jenis) !== asal[id][jenis]; },
     gagalSimpan() { return gagalSimpan; },

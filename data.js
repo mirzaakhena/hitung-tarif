@@ -12,9 +12,11 @@
  * ±120–180 rb), lebih tinggi untuk alat yang lebih rumit. Harga yang diubah
  * di halaman disimpan di peramban (`harga.js`); berkas ini tetap harga contohnya.
  *
- * `senioritas` dan `penilaian` dipakai simulasi bonus bintang (tiket
- * 261028095701): batas bonus dan potongan dalam persen dari tarif dasar, dan
- * enam penilaian yang disetujui Mirza 28 Okt 2026.
+ * `grading` (dulu `senioritas`, tiket 261030105301): lima grading mitra
+ * dengan poin maksimal (dulu "bonus maksimal") dan potongan maksimal dalam
+ * persen dari tarif dasar. `penilaian`: enam penilaian bintang yang disetujui
+ * Mirza 28 Okt 2026. Keduanya dipakai simulasi bonus bintang (tiket
+ * 261028095701, kini tidak di menu) dan tab Grading.
  */
 window.POC_TARIF = {
   jenis: [
@@ -22,14 +24,18 @@ window.POC_TARIF = {
     { id: 'perbaikan', nama: 'Perbaikan' },
     { id: 'perawatan', nama: 'Perawatan' },
   ],
-  // Urutan dari yang paling junior. Angka dari Mirza, 28 Okt 2026 — angka asal
-  // tab Batas senioritas; angka yang diubah di sana disimpan lewat `batas.js`.
-  senioritas: [
-    { id: 'rookie', nama: 'Rookie', bonusMaks: 5, potonganMaks: 60 },
-    { id: 'senior', nama: 'Senior', bonusMaks: 10, potonganMaks: 50 },
-    { id: 'intermediate', nama: 'Intermediate', bonusMaks: 15, potonganMaks: 45 },
-    { id: 'advance', nama: 'Advance', bonusMaks: 20, potonganMaks: 40 },
-    { id: 'expert', nama: 'Expert', bonusMaks: 20, potonganMaks: 10 },
+  // Urutan dari yang paling rendah: Rookie < Intermediate < Senior < Advance <
+  // Expert (Mirza, 30 Okt 2026; dulu Senior sebelum Intermediate). Angkanya
+  // ikut posisi, jadi Intermediate kini 10/50 dan Senior 15/45 — angka asal
+  // tab Grading; angka yang diubah di sana disimpan lewat `batas.js`.
+  // `id` tetap id lama supaya angka tersimpan berlaku untuk grading yang sama
+  // namanya (lihat `batas.js`).
+  grading: [
+    { id: 'rookie', nama: 'Rookie', poinMaks: 5, potonganMaks: 60 },
+    { id: 'intermediate', nama: 'Intermediate', poinMaks: 10, potonganMaks: 50 },
+    { id: 'senior', nama: 'Senior', poinMaks: 15, potonganMaks: 45 },
+    { id: 'advance', nama: 'Advance', poinMaks: 20, potonganMaks: 40 },
+    { id: 'expert', nama: 'Expert', poinMaks: 20, potonganMaks: 10 },
   ],
   // Nilai tiap bintang: indeks 0 = bintang 1.
   nilaiBintang: [-2, -1, 0, 1, 2],

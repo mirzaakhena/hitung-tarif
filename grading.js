@@ -1,20 +1,27 @@
 /*
- * POC tab Batas senioritas (tiket 261028104601).
+ * POC tab Grading (tiket 261028104601 sebagai "Batas senioritas"; jadi Grading,
+ * urutan Intermediate sebelum Senior, dan "bonus" jadi "poin" di tiket
+ * 261030105301).
  *
- * Lima senioritas, masing-masing dua angka (bonus maksimal, potongan
- * maksimal) dalam persen dari tarif dasar. Angka Mirza dari `data.js`; angka
- * yang diubah disimpan lewat `batas.js` (dipakai juga oleh simulasi), hanya
- * yang berbeda dari angka Mirza. "Kembali ke angka Mirza" membuang simpanan itu.
+ * Lima grading, masing-masing dua angka (poin maksimal, potongan maksimal)
+ * dalam persen dari tarif dasar. Angka Mirza dari `data.js`; angka yang diubah
+ * disimpan lewat `batas.js` (dipakai juga oleh simulasi), hanya yang berbeda
+ * dari angka Mirza. "Kembali ke angka Mirza" membuang simpanan itu.
  *
  * Isian diterima hanya bila bilangan bulat 0–100 (lihat `periksaBatas`),
  * keputusan Mirza 28 Okt 2026. Isian yang ditolak tidak mengubah angka yang
  * berlaku.
+ *
+ * Di bawah tabel: grading mitra rekaan tab Formula tarif mitra (tiket
+ * 261030124701, dulu dipilih di tab itu), disimpan lewat `pengaturan.js`,
+ * beserta batasnya yang berlaku menurut tabel di atasnya.
  */
 (function () {
   'use strict';
 
   const D = window.POC_TARIF;
   const B = window.POC_BATAS;
+  const P = window.POC_PENGATURAN;
   const MAKS = B.MAKS;
 
   let tanyaReset = false;
@@ -29,16 +36,16 @@
   function periksaBatas(teks) {
     const t = String(teks).trim().replace(/\s*%$/, '');
     if (t === '') return { ok: false, alasan: 'Angka wajib diisi. Tulis bilangan bulat 0–' + MAKS + ', misalnya 8.' };
-    if (/^-/.test(t)) return { ok: false, alasan: 'Batas tidak boleh negatif. Tulis bilangan bulat 0–' + MAKS + '.' };
+    if (/^-/.test(t)) return { ok: false, alasan: 'Poin dan potongan tidak boleh negatif. Tulis bilangan bulat 0–' + MAKS + '.' };
     if (/^\d+$/.test(t)) {
       const n = Number(t);
-      if (n > MAKS) return { ok: false, alasan: 'Batas paling besar ' + MAKS + '%: potongan di atas itu membuat pembayaran negatif.' };
+      if (n > MAKS) return { ok: false, alasan: 'Poin dan potongan paling besar ' + MAKS + '%: potongan di atas itu membuat pembayaran negatif.' };
       return { ok: true, nilai: n };
     }
     if (/^[\d.,]+$/.test(t)) {
-      return { ok: false, alasan: 'Batas harus bilangan bulat, tanpa koma atau pecahan, misalnya 8.' };
+      return { ok: false, alasan: 'Poin dan potongan harus bilangan bulat, tanpa koma atau pecahan, misalnya 8.' };
     }
-    return { ok: false, alasan: 'Batas hanya boleh berisi angka 0–' + MAKS + ', misalnya 8.' };
+    return { ok: false, alasan: 'Poin dan potongan hanya boleh berisi angka 0–' + MAKS + ', misalnya 8.' };
   }
 
   /* --------------------------------------------------------- tampilan ---- */
@@ -55,7 +62,7 @@
       ? '<b>' + n + '</b> angka diubah dari angka Mirza.'
       : 'Semua angka masih angka Mirza.';
     const peringatan = B.gagalSimpan()
-      ? '<p class="peringatan" role="alert">Peramban menolak menyimpan, jadi perubahan hilang saat halaman dimuat ulang dan tidak terbaca di simulasi.</p>'
+      ? '<p class="peringatan" role="alert">Peramban menolak menyimpan, jadi perubahan hilang saat halaman dimuat ulang.</p>'
       : '';
     const reset = tanyaReset
       ? '<span class="tanya" role="group" aria-label="Konfirmasi">' +
@@ -95,20 +102,46 @@
     );
   }
 
+  /** Batas grading mitra yang sedang dipilih, menurut angka yang berlaku di tabel. */
+  function teksBatasMitra() {
+    const g = B.grading(P.gradingMitra());
+    return 'Batas ' + esc(g.nama) + ': poin maksimal <b>' + g.poinMaks + '%</b> · potongan maksimal <b>' + g.potonganMaks + '%</b>';
+  }
+
+  function gambarMitra() {
+    const opsi = D.grading.map((x) => '<option value="' + x.id + '"' + (x.id === P.gradingMitra() ? ' selected' : '') + '>' + esc(x.nama) + '</option>').join('');
+    return (
+      '<section class="panel panel-mitra" id="grading-mitra" aria-labelledby="judul-mitra">' +
+        '<h2 id="judul-mitra">Grading mitra</h2>' +
+        '<div class="baris-mitra">' +
+          '<label class="isian-pilih"><span>Grading mitra</span><select data-grading-mitra>' + opsi + '</select></label>' +
+          '<p class="batas-pilihan" data-batas-mitra>' + teksBatasMitra() + '</p>' +
+        '</div>' +
+        '<p class="redup kecil">Dipakai <a href="formula.html">tab Formula tarif mitra</a> saat "Terapkan perubahan tarif" ditekan; tiap order di sana mencatat grading saat ia dibuat.</p>' +
+        (P.gagalSimpan() ? '<p class="peringatan" role="alert">Peramban menolak menyimpan, jadi grading mitra tidak terbaca tab Formula tarif mitra dan hilang saat halaman dimuat ulang.</p>' : '') +
+      '</section>'
+    );
+  }
+
   function gambar() {
     akar.innerHTML =
       '<div data-bar>' + gambarBar() + '</div>' +
       '<div class="bungkus-tabel">' +
         '<table class="tarif batas-ubah">' +
-          '<thead><tr><th scope="col">Senioritas</th>' +
+          '<thead><tr><th scope="col">Grading</th>' +
             B.JENIS.map((j) => '<th scope="col" class="kolom-harga">' + esc(j.nama) + ' <span class="redup">(%, ' + esc(j.keterangan) + ')</span></th>').join('') +
           '</tr></thead>' +
-          '<tbody>' + D.senioritas.map((s) =>
-            '<tr data-senioritas="' + s.id + '"><th scope="row">' + esc(s.nama) + '</th>' +
+          '<tbody>' + D.grading.map((s) =>
+            '<tr data-grading="' + s.id + '"><th scope="row">' + esc(s.nama) + '</th>' +
               B.JENIS.map((j) => gambarSel(s, j)).join('') + '</tr>').join('') +
           '</tbody>' +
         '</table>' +
-      '</div>';
+      '</div>' +
+      '<div data-bagian-mitra>' + gambarMitra() + '</div>';
+  }
+
+  function gambarUlangMitra() {
+    akar.querySelector('[data-bagian-mitra]').innerHTML = gambarMitra();
   }
 
   function gambarUlangBar() {
@@ -140,6 +173,7 @@
     td.querySelector('[data-asal]').textContent = teksAsal(id, jenis);
     tanyaReset = false;
     gambarUlangBar();
+    akar.querySelector('[data-batas-mitra]').innerHTML = teksBatasMitra();
   }
 
   /** Esc: buang ketikan, kembali ke angka yang berlaku. */
@@ -150,6 +184,12 @@
 
   akar.addEventListener('change', (e) => {
     if (e.target.matches('input[data-sen]')) terapkan(e.target);
+    else if (e.target.matches('select[data-grading-mitra]')) {
+      if (P.aturGradingMitra(e.target.value)) {
+        gambarUlangMitra();
+        akar.querySelector('select[data-grading-mitra]').focus();
+      }
+    }
   });
 
   akar.addEventListener('keydown', (e) => {
@@ -186,8 +226,9 @@
 
   // Angka diubah di tab ini pada jendela lain, atau kembali ke halaman ini dari tembolok.
   window.addEventListener('storage', (e) => {
-    if (e.key === B.KUNCI || e.key === null) {
+    if (e.key === B.KUNCI || e.key === P.KUNCI_MITRA || e.key === null) {
       B.muatUlang();
+      P.muatUlang();
       tanyaReset = false;
       gambar();
     }
@@ -195,6 +236,7 @@
   window.addEventListener('pageshow', (e) => {
     if (e.persisted) {
       B.muatUlang();
+      P.muatUlang();
       tanyaReset = false;
       gambar();
     }

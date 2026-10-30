@@ -42,7 +42,7 @@ button, input { font: inherit; color: inherit; }
   background: var(--peringatan-lembut); color: var(--peringatan);
   font-size: 12px; font-weight: 600;
 }
-.pengantar { margin: 0 0 16px; color: var(--teks-2); max-width: 62ch; }
+.pengantar { margin: 0 0 16px; color: var(--teks-2); } /* selebar halaman (tiket 261030124701) */
 .redup { color: var(--redup); font-weight: 400; }
 
 /* Bar status dan tombol kembali ke contoh */
@@ -115,7 +115,8 @@ button, input { font: inherit; color: inherit; }
 }
 
 /* --------------------------------------------------------------------------
- * Navigasi antarhalaman POC dan simulasi bonus bintang (tiket 261028095701).
+ * Navigasi antarhalaman POC dan simulasi bonus bintang (tiket 261028095701;
+ * simulasi tidak di menu sejak 261030105301).
  * Layar lebar: dua cara hasil berdampingan; ≤ 640px: bertumpuk.
  * ------------------------------------------------------------------------ */
 .nav { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 10px 0 4px; }
@@ -203,7 +204,7 @@ button, input { font: inherit; color: inherit; }
 .langkah ol { margin: 6px 0 0; padding-left: 20px; }
 .langkah li { margin: 0 0 4px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
 
-/* Batas senioritas yang sedang dipilih, di simulasi (tiket 261028104601) */
+/* Batas grading yang sedang dipilih, di simulasi (tiket 261028104601) */
 .batas-pilihan { margin: 6px 0 0; }
 .batas-pilihan b { font-variant-numeric: tabular-nums; }
 .batas-pilihan a { color: var(--merek); white-space: nowrap; }
@@ -214,11 +215,12 @@ button, input { font: inherit; color: inherit; }
 }
 
 /* --------------------------------------------------------------------------
- * Tab Batas senioritas (tiket 261028104601). Memakai tabel `.tarif`; di layar
- * sempit tiap senioritas jadi kartu dengan dua isian berdampingan.
+ * Tab Grading (tiket 261028104601, dulu Batas senioritas). Memakai tabel
+ * `.tarif`; di layar sempit tiap grading jadi kartu dengan dua isian berdampingan.
  * ------------------------------------------------------------------------ */
-#batas { max-width: 640px; }
-.batas-ubah .kolom-harga { width: 210px; text-align: left; }
+/* Selebar halaman seperti paragraf pengantar (tiket 261030133101): dua kolom
+   angka berbagi sisa lebar sama rata; isiannya tetap selebar tiga angka. */
+.batas-ubah .kolom-harga { width: 35%; text-align: left; }
 .isian-persen { display: flex; align-items: center; gap: 6px; max-width: 120px; }
 .isian-persen > span { color: var(--teks-2); }
 .asal { margin: 4px 0 0; color: var(--merek); font-size: 12px; line-height: 1.4; }
@@ -227,4 +229,130 @@ button, input { font: inherit; color: inherit; }
 @media (max-width: 640px) {
   .batas-ubah tr { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .isian-persen { max-width: none; }
+}
+
+/* --------------------------------------------------------------------------
+ * Tab Formula tarif mitra (tiket 261030105302). Tabel order dan tarif mitra
+ * memakai `.tarif`; di layar sempit tiap baris jadi kartu dengan label per
+ * kolom (`data-jenis`). Langkah hitung dua rumus berdampingan (`.dua-cara`),
+ * bertumpuk di layar sempit.
+ * ------------------------------------------------------------------------ */
+.baris-mitra { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 16px; }
+.baris-mitra .isian-pilih { width: 200px; }
+.baris-mitra .batas-pilihan { margin: 0 0 6px; }
+.ulasan-bintang { margin: 14px 0 4px; }
+.ulasan-bintang .penilaian { margin-bottom: 6px; }
+.bar-kiri { flex-wrap: wrap; margin-top: 4px; }
+.tombol-utama { background: var(--merek); border-color: var(--merek); color: #fff; font-weight: 600; }
+.tombol-utama:hover:not(:disabled) { background: #1a43bb; color: #fff; }
+.bar-order { margin: 12px 0 0; justify-content: flex-start; }
+.bar-order .bar-aksi { margin-left: auto; }
+.tabel-order td, .tabel-tarif-mitra td { padding-top: 10px; padding-bottom: 10px; }
+.tabel-order tbody th[scope="row"] { padding-top: 10px; }
+/* Warna baris per penerapan, berselang-seling (tiket 261030124701): ganjil
+   abu-abu seperti sebelumnya, genap sedikit lebih gelap; yang belum dihitung
+   putih dengan garis biru di kiri. Tabel tarif mitra memakai dua warna yang
+   sama per modular (tiket 261030134401). */
+.tabel-order tr.penerapan-ganjil, .tabel-tarif-mitra tr.modular-ganjil { background: #fafbfc; }
+.tabel-order tr.penerapan-genap, .tabel-tarif-mitra tr.modular-genap { background: #eceff3; }
+.tabel-order tr.belum > th[scope="row"] { box-shadow: inset 3px 0 0 var(--merek); }
+.angka-rapat { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; white-space: nowrap; }
+.tanda-sudah {
+  display: inline-block; padding: 0 8px; border-radius: 999px; white-space: nowrap;
+  background: #eaf7ef; color: #17663a; font-size: 12px; font-weight: 600;
+}
+.tabel-tarif-mitra td { text-align: right; font-variant-numeric: tabular-nums; }
+.tabel-tarif-mitra .selisih { display: block; font-size: 12px; color: var(--redup); }
+.tabel-tarif-mitra td.naik .selisih { color: #17663a; }
+.tabel-tarif-mitra td.turun .selisih { color: var(--buruk); }
+.poin-dua { margin-top: 12px; }
+.tautan-tab { color: var(--merek); white-space: nowrap; }
+.daftar-penyetel dd { text-align: right; }
+.daftar-penyetel .diubah dt, .daftar-penyetel .diubah dd { color: var(--merek); }
+.panel-mitra { margin-top: 16px; }
+.panel-mitra a, #penyetel .panel a { color: var(--merek); }
+.penerapan { margin: 12px 0 0; border: 1px solid var(--garis); border-radius: var(--sudut); } /* jarak sama dengan .poin-dua (tiket 261030134401) */
+.penerapan > summary { cursor: pointer; padding: 8px 12px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.penerapan[open] > summary { border-bottom: 1px solid var(--garis); }
+.penerapan > .dua-cara { padding: 12px; }
+.penerapan > p { margin: 8px 12px 0; }
+/* Tabel Order bisa dilipat dan disaring; riwayat menyatu dengan Tarif milik
+   mitra (tiket 261030134401). */
+.tombol-lipat {
+  display: inline-flex; align-items: baseline; gap: 6px; padding: 0; border: 0;
+  background: none; font: inherit; color: inherit; cursor: pointer; text-align: left;
+}
+.tombol-lipat:hover { color: var(--merek); }
+.tombol-lipat:focus-visible { outline: 2px solid var(--merek); outline-offset: 2px; border-radius: 4px; }
+.panah-lipat { display: inline-block; width: 1em; color: var(--redup); }
+.saring-order { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.saring-order [aria-pressed="true"] { background: var(--merek-lembut); border-color: var(--merek); color: var(--merek); font-weight: 600; }
+.daftar-penerapan {
+  position: relative; max-height: 15rem; overflow-y: auto; list-style: none;
+  margin: 0 0 12px; padding: 0; border: 1px solid var(--garis); border-radius: var(--sudut);
+}
+.daftar-penerapan li + li { border-top: 1px solid var(--garis); }
+.pilih-penerapan {
+  display: block; width: 100%; padding: 6px 12px; border: 0; background: var(--kartu);
+  font: inherit; font-size: 13px; text-align: left; font-variant-numeric: tabular-nums; cursor: pointer;
+}
+.pilih-penerapan:hover { color: var(--merek); }
+.pilih-penerapan:focus-visible { outline: 2px solid var(--merek); outline-offset: -2px; }
+.pilih-penerapan[aria-current="true"] { background: var(--merek-lembut); color: var(--merek); font-weight: 600; box-shadow: inset 3px 0 0 var(--merek); }
+.ringkas-penerapan { margin: 0 0 6px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.daftar-langkah { margin: 4px 0 0; padding-left: 20px; font-size: 13px; color: var(--teks-2); }
+.daftar-langkah li { margin: 0 0 6px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.daftar-langkah ul { margin: 4px 0 0; padding-left: 16px; list-style: disc; }
+.daftar-langkah ul li { margin-bottom: 2px; }
+.kisi-penyetel { display: grid; gap: 10px; }
+.isian-penyetel input {
+  width: 120px; padding: 5px 8px; border: 1px solid var(--garis-2); border-radius: 6px;
+  background: var(--kartu); font-variant-numeric: tabular-nums;
+}
+.isian-penyetel input:focus { outline: 2px solid var(--merek); outline-offset: -1px; border-color: var(--merek); }
+.isian-penyetel.diubah input { background: var(--merek-lembut); border-color: var(--merek); }
+.isian-penyetel input[aria-invalid="true"] { border-color: var(--buruk); background: var(--buruk-lembut); }
+.isian-penyetel .galat { margin: 0; }
+.isian-centang { display: block; }
+.isian-centang.diubah { color: var(--merek); }
+
+/* Dua tab cara menambah order (tiket 261030141201): Set contoh order dan
+   Input ulasan order secara manual; tab terpilih bergaris biru di bawah. */
+.daftar-tab { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0 0 14px; border-bottom: 1px solid var(--garis); }
+.tab {
+  margin: 0 0 -1px; padding: 6px 2px 8px; border: 0; border-bottom: 2px solid transparent;
+  background: none; font: inherit; font-size: 15px; font-weight: 600; color: var(--teks-2); cursor: pointer; text-align: left;
+}
+.tab:hover { color: var(--merek); }
+.tab[aria-selected="true"] { color: var(--teks); border-bottom-color: var(--merek); }
+.tab:focus-visible { outline: 2px solid var(--merek); outline-offset: 2px; border-radius: 4px; }
+.panel-isi-tab > div > :first-child { margin-top: 0; }
+
+/* Sepuluh set contoh order (tiket 261030141201): dua kolom di layar lebar. */
+.daftar-set {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;
+  list-style: none; margin: 0; padding: 0;
+}
+.set-contoh {
+  display: flex; flex-direction: column; gap: 4px; padding: 10px 12px;
+  border: 1px solid var(--garis); border-radius: var(--sudut);
+}
+.set-contoh p { margin: 0; }
+.set-kalimat { color: var(--teks-2); font-size: 13px; }
+.set-aksi { margin-top: auto; padding-top: 4px; }
+.daftar-set + .status { margin-top: 10px; }
+
+@media (max-width: 640px) {
+  .daftar-set { grid-template-columns: minmax(0, 1fr); }
+  /* Hari menambah satu kolom: Status mendapat barisnya sendiri supaya tandanya tidak keluar kartu. */
+  .tabel-order td[data-kolom="status"] { grid-column: 1 / -1; }
+  .baris-mitra .isian-pilih { width: 100%; }
+  .bar-order .bar-aksi { margin-left: 0; }
+  .tabel-order tbody th[scope="row"], .tabel-tarif-mitra tbody th[scope="row"] { padding-top: 0; }
+  .tabel-order td, .tabel-tarif-mitra td { padding: 0; }
+  .tabel-order tr.belum { border-left: 3px solid var(--merek); }
+  .tabel-order tr.belum > th[scope="row"] { box-shadow: none; }
+  .tabel-tarif-mitra td { text-align: left; }
+  .angka-rapat { white-space: normal; }
+  .penerapan > .dua-cara { padding: 8px; }
 }

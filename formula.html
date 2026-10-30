@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>NuKitu · POC formula tarif mitra</title>
+  <!--
+    POC tab Formula tarif mitra (tiket 261030105302): order rekaan satu mitra,
+    penyesuaian berkala ("Terapkan perubahan tarif"), dan tarif mitra menurut rumus
+    Mirza dan rumus usulan berdampingan, dengan langkah hitungnya. Hitungannya
+    di rumus.js, halamannya di formula.js. Tarif dasar dibaca lewat harga.js,
+    batas grading lewat batas.js, grading mitra dan penyetel lewat
+    pengaturan.js (diubah di tab Grading dan Penyetel rumus, tiket
+    261030124701). Riwayat penerapan menyatu dengan Tarif milik mitra, tabel
+    Order bisa dilipat dan disaring (tiket 261030134401). Tiap order punya
+    hari ("Pekan n · Hari") dan ada sepuluh set contoh order di contoh.js
+    (tiket 261030141201). Dibuka dari file://, tanpa server, build, atau CDN.
+  -->
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <main class="halaman">
+    <header class="kepala">
+      <p class="label-poc">POC · tidak tersambung ke aplikasi</p>
+      <nav class="nav" aria-label="Halaman POC">
+        <a href="index.html">Tarif dasar</a>
+        <a href="grading.html">Grading</a>
+        <a href="penyetel.html">Penyetel rumus</a>
+        <a href="formula.html" aria-current="page">Formula tarif mitra</a>
+      </nav>
+      <h1>Formula tarif mitra</h1>
+      <p class="pengantar">
+        Tarif mitra awalnya sama dengan tarif dasar, lalu disesuaikan berkala
+        dari order yang ia selesaikan sejak penyesuaian sebelumnya. Buat ulasan
+        order rekaan untuk satu mitra, lalu tekan "Terapkan perubahan tarif" untuk
+        satu penyesuaian (dalam konsepnya seminggu sekali), atau muat salah satu
+        dari sepuluh set contoh: mitra yang sudah berjalan beberapa pekan. Tarifnya dihitung dengan rumus Mirza dan rumus usulan
+        berdampingan; tiap penerapan punya halamannya sendiri di Tarif milik
+        mitra, lengkap dengan cara hitungnya.
+        Grading mitra diatur di tab Grading, angka kedua rumus di tab Penyetel
+        rumus.
+      </p>
+    </header>
+
+    <div id="formula"></div>
+    <noscript>Halaman ini butuh JavaScript.</noscript>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="penyimpanan.js"></script>
+  <script src="harga.js"></script>
+  <script src="batas.js"></script>
+  <script src="rumus.js"></script>
+  <script src="pengaturan.js"></script>
+  <script src="contoh.js"></script>
+  <script src="formula.js"></script>
+</body>
+</html>

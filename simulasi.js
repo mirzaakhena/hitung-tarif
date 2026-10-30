@@ -1,21 +1,26 @@
 /*
  * POC simulasi bonus dan potongan dari enam bintang (tiket 261028095701).
  *
- * Pilih pekerjaan (modular + jenis) dan senioritas, beri enam bintang, lalu
+ * Pilih pekerjaan (modular + jenis) dan grading, beri enam bintang, lalu
  * hasilnya langsung terlihat menurut dua cara yang masih dibandingkan Mirza:
  *
  *   A — nilai keenam bintang dijumlahkan dulu (S, −12..+12). S > 0 memberi
- *       S/12 × bonus maksimal; S < 0 memberi S/12 × potongan maksimal.
+ *       S/12 × poin maksimal; S < 0 memberi S/12 × potongan maksimal.
  *   B — nilai positif (P, 0..12) dan negatif (N, −12..0) dihitung terpisah:
- *       P/12 × bonus maksimal + N/12 × potongan maksimal.
+ *       P/12 × poin maksimal + N/12 × potongan maksimal.
  *
- * Tarif dasar dibaca lewat `harga.js` dan batas bonus/potongan per senioritas
+ * Tarif dasar dibaca lewat `harga.js` dan poin/potongan maksimal per grading
  * lewat `batas.js` (tiket 261028104601), jadi angka yang diubah di tab Tarif
- * dasar dan Batas senioritas ikut terpakai (juga bila diubah di tab lain:
- * peristiwa `storage`).
+ * dasar dan Grading ikut terpakai (juga bila diubah di tab lain: peristiwa
+ * `storage`).
+ *
+ * Sejak tiket 261030105301 halaman ini tidak di menu dan tidak dikembangkan;
+ * istilahnya disesuaikan sejauh menunjuk tab Grading (grading, poin maksimal).
+ * "Bonus" tetap dipakai untuk hasilnya, karena itulah yang disimulasikan:
+ * tambahan pembayaran per order.
  *
  * Hitungannya bilangan bulat supaya tidak ada galat pecahan: persen disimpan
- * sebagai X/12 (X = S × maks, atau P × bonus + N × potongan), besar Rupiah
+ * sebagai X/12 (X = S × maks, atau P × poin + N × potongan), besar Rupiah
  * sebagai tarif × X / 1200. Pembayaran dibulatkan ke rupiah utuh (setengah
  * ke atas); langkah hitung menampilkan angka sebelum pembulatan.
  */
@@ -85,13 +90,13 @@
     return { x, pembilang, bayarPembilang, bayar, besar: bayar - tarif };
   }
 
-  /** Semua hitungan untuk tarif, nilai keenam bintang, dan senioritas. */
+  /** Semua hitungan untuk tarif, nilai keenam bintang, dan grading. */
   function hitung(tarif, nilai, sen) {
     const S = nilai.reduce((t, v) => t + v, 0);
     const P = nilai.filter((v) => v > 0).reduce((t, v) => t + v, 0);
     const N = nilai.filter((v) => v < 0).reduce((t, v) => t + v, 0);
-    const xA = S > 0 ? S * sen.bonusMaks : S * sen.potonganMaks;
-    const xBonus = P * sen.bonusMaks;
+    const xA = S > 0 ? S * sen.poinMaks : S * sen.potonganMaks;
+    const xBonus = P * sen.poinMaks;
     const xPotongan = N * sen.potonganMaks;
     return {
       S, P, N, xBonus, xPotongan,
@@ -109,12 +114,12 @@
   const pilihan = {
     modular: H.contoh['MRI System'] ? 'MRI System' : modularSemua[0],
     jenis: D.jenis[0].id,
-    senioritas: D.senioritas[0].id,
+    grading: D.grading[0].id,
     bintang: Object.fromEntries(D.penilaian.map((p) => [p.id, 3])),
   };
 
-  // Batas yang berlaku (angka Mirza atau yang diubah di tab Batas senioritas).
-  const senioritasDari = (id) => B.senioritas(id);
+  // Batas yang berlaku (angka Mirza atau yang diubah di tab Grading).
+  const gradingDari = (id) => B.grading(id);
   const nilaiSekarang = () => D.penilaian.map((p) => NILAI[pilihan.bintang[p.id] - 1]);
 
   /* -------------------------------------------------------- tampilan ---- */
@@ -131,14 +136,14 @@
         k.modular.map(([nama]) => '<option value="' + esc(nama) + '"' + (nama === pilihan.modular ? ' selected' : '') + '>' + esc(nama) + '</option>').join('') +
       '</optgroup>').join('');
     const opsiJenis = D.jenis.map((j) => '<option value="' + j.id + '"' + (j.id === pilihan.jenis ? ' selected' : '') + '>' + esc(j.nama) + '</option>').join('');
-    const opsiSen = D.senioritas.map((s) => '<option value="' + s.id + '"' + (s.id === pilihan.senioritas ? ' selected' : '') + '>' + esc(s.nama) + '</option>').join('');
+    const opsiSen = D.grading.map((s) => '<option value="' + s.id + '"' + (s.id === pilihan.grading ? ' selected' : '') + '>' + esc(s.nama) + '</option>').join('');
     return (
       '<section class="panel" aria-labelledby="judul-pekerjaan">' +
         '<h2 id="judul-pekerjaan">Pekerjaan dan mitra</h2>' +
         '<div class="pilih-pekerjaan">' +
           '<label class="isian-pilih isian-modular"><span>Modular</span><select data-pilih="modular">' + opsiModular + '</select></label>' +
           '<label class="isian-pilih"><span>Jenis pekerjaan</span><select data-pilih="jenis">' + opsiJenis + '</select></label>' +
-          '<label class="isian-pilih"><span>Senioritas mitra</span><select data-pilih="senioritas">' + opsiSen + '</select></label>' +
+          '<label class="isian-pilih"><span>Grading mitra</span><select data-pilih="grading">' + opsiSen + '</select></label>' +
         '</div>' +
         '<p class="tarif-dasar" data-tarif></p>' +
         '<p class="batas-pilihan" data-batas-pilihan></p>' +
@@ -247,7 +252,7 @@
   }
 
   function perbarui() {
-    const sen = senioritasDari(pilihan.senioritas);
+    const sen = gradingDari(pilihan.grading);
     const tarif = H.harga(pilihan.modular, pilihan.jenis);
     const jenis = D.jenis.find((j) => j.id === pilihan.jenis);
     const nilai = nilaiSekarang();
@@ -267,18 +272,18 @@
     });
 
     /** "8%" dengan tanda bila berbeda dari angka Mirza. */
-    const angkaBatas = (jenis) => '<b data-' + (jenis === 'bonusMaks' ? 'bonus' : 'potongan') + '-maks>' + sen[jenis] + '%</b>' +
+    const angkaBatas = (jenis) => '<b data-' + (jenis === 'poinMaks' ? 'poin' : 'potongan') + '-maks>' + sen[jenis] + '%</b>' +
       (B.diubah(sen.id, jenis) ? ' <span class="tanda-diubah">diubah, angka Mirza ' + B.asal[sen.id][jenis] + '%</span>' : '');
     akar.querySelector('[data-batas-pilihan]').innerHTML =
-      'Batas ' + esc(sen.nama) + ': bonus maksimal ' + angkaBatas('bonusMaks') +
+      'Batas ' + esc(sen.nama) + ': poin maksimal ' + angkaBatas('poinMaks') +
       ' · potongan maksimal ' + angkaBatas('potonganMaks') +
-      ' · <a href="senioritas.html">ubah di tab Batas senioritas</a>';
+      ' · <a href="grading.html">ubah di tab Grading</a>';
 
     const positif = nilai.filter((v) => v > 0);
     const negatif = nilai.filter((v) => v < 0);
 
     const langkahA = ['Jumlah nilai keenam bintang: ' + deret(nilai) + ' = ' + nilaiTeks(r.S)];
-    if (r.S > 0) langkahA.push(nilaiTeks(r.S) + ' ÷ 12 × bonus maksimal ' + sen.bonusMaks + '% = ' + persen(r.a.x));
+    if (r.S > 0) langkahA.push(nilaiTeks(r.S) + ' ÷ 12 × poin maksimal ' + sen.poinMaks + '% = ' + persen(r.a.x));
     else if (r.S < 0) langkahA.push(nilaiTeks(r.S) + ' ÷ 12 × potongan maksimal ' + sen.potonganMaks + '% = ' + persen(r.a.x));
     else langkahA.push('Jumlahnya 0: tanpa bonus atau potongan');
 
@@ -287,7 +292,7 @@
       ? judul + ': ' + deret(daftar) + ' = ' + nilaiTeks(jumlah) + ' → ' + nilaiTeks(jumlah) + ' ÷ 12 × ' + batas + ' maksimal ' + maks + '% = ' + persen(x) + ' → ' + rpMentah(tarif * x, true)
       : judul + ': tidak ada → ' + batas + ' 0%';
     const langkahB = [
-      bagianB('Nilai positif', 'bonus', positif, r.P, sen.bonusMaks, r.xBonus),
+      bagianB('Nilai positif', 'poin', positif, r.P, sen.poinMaks, r.xBonus),
       bagianB('Nilai negatif', 'potongan', negatif, r.N, sen.potonganMaks, r.xPotongan),
       'Bonus dan potongan dijumlahkan: ' + (r.xBonus ? persen(r.xBonus) : '0%') + ' ' + (r.xPotongan ? persen(r.xPotongan) : '+ 0%') + ' = ' + (r.b.x ? persen(r.b.x) : '0%'),
     ];
@@ -297,7 +302,7 @@
         D.penilaian.map((p, i) => '<span class="chip ' + (nilai[i] > 0 ? 'naik' : nilai[i] < 0 ? 'turun' : '') + '" title="' + esc(p.nama) + '">' + esc(p.kelompok) + ' ' + (D.penilaian.filter((q) => q.kelompok === p.kelompok).indexOf(p) + 1) + ' <b>' + nilaiTeks(nilai[i]) + '</b></span>').join(' ') +
       '</p>' +
       '<div class="dua-cara">' +
-        kartu('a', 'Cara A · jumlahkan nilai dulu', 'Nilai keenam bintang dijumlahkan; hasil positif memakai bonus maksimal, negatif memakai potongan maksimal.', r.a, langkahA.concat(langkahBayar(tarif, r.a))) +
+        kartu('a', 'Cara A · jumlahkan nilai dulu', 'Nilai keenam bintang dijumlahkan; hasil positif memakai poin maksimal, negatif memakai potongan maksimal.', r.a, langkahA.concat(langkahBayar(tarif, r.a))) +
         kartu('b', 'Cara B · bonus dan potongan terpisah', 'Nilai positif menjadi bonus dan nilai negatif menjadi potongan, masing-masing dengan batasnya, lalu dijumlahkan.', r.b, langkahB.concat(langkahBayar(tarif, r.b))) +
       '</div>';
   }
